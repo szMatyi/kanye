@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Napi Kanye West idézet</title>
+  <style>
+    /* Alapbeállítások */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: "Helvetica Neue", Arial, sans-serif;
+      background: linear-gradient(135deg, #ff66cc, #9966ff);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #fff;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Csillag-effektus konténer */
+    .stars {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 0;
+    }
+    .star {
+      position: absolute;
+      width: 3px;
+      height: 3px;
+      background: rgba(255,255,255,0.8);
+      border-radius: 50%;
+      animation: twinkle 3s infinite ease-in-out alternate, moveStar 20s linear infinite;
+    }
+    @keyframes twinkle {
+      from { opacity: 0.2; }
+      to   { opacity: 1; }
+    }
+    @keyframes moveStar {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(200px); }
+    }
+
+    /* Lebegő felhő-alakzat (opcionális) */
+    .cloud {
+      position: absolute;
+      width: 120px;
+      height: 60px;
+      background: #fff;
+      border-radius: 50%;
+      opacity: 0.3;
+      z-index: 0;
+      animation: floatCloud 10s ease-in-out infinite alternate;
+    }
+    @keyframes floatCloud {
+      from { transform: translateY(-10px); }
+      to   { transform: translateY(10px); }
+    }
+
+    /* Központi kártya */
+    .container {
+      position: relative;
+      z-index: 1;
+      background: rgba(255,255,255,0.2);
+      backdrop-filter: blur(8px);
+      padding: 30px;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 600px;
+      text-align: center;
+      box-shadow: 0 0 20px rgba(255,255,255,0.4);
+      animation: glow 4s ease-in-out infinite alternate;
+    }
+    @keyframes glow {
+      from {
+        box-shadow: 0 0 20px rgba(255,255,255,0.2);
+      }
+      to {
+        box-shadow: 0 0 35px rgba(255,255,255,0.7);
+      }
+    }
+
+    /* Album borító – hover-effekt, kattintás */
+    .album-cover {
+      width: 200px;
+      border-radius: 12px;
+      margin-bottom: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      cursor: pointer; /* jelzi, hogy interakció lehetséges */
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .album-cover:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+    }
+
+    /* Főcím */
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 20px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    /* Idézet – fade animációk */
+    #quote {
+      font-size: 1.5rem;
+      line-height: 1.6;
+      font-style: italic;
+      margin: 20px auto;
+      max-width: 500px;
+      opacity: 1;
+      transition: opacity 0.5s ease;
+    }
+    .fade-out {
+      opacity: 0;
+    }
+
+    .signature {
+      margin-top: 10px;
+      font-size: 1rem;
+      opacity: 0.8;
+      text-shadow: 1px 1px 1px rgba(0,0,0,0.2);
+    }
+
+    /* Gombok */
+    .buttons {
+      margin-top: 20px;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    button {
+      cursor: pointer;
+      background: rgba(255,255,255,0.25);
+      border: none;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 1rem;
+      color: #fff;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: rgba(255,255,255,0.4);
+    }
+
+    /* Like gomb (szív ikon) */
+    .like-btn {
+      position: relative;
+      width: 40px;
+      height: 40px;
+      background: none;
+      border: none;
+      outline: none;
+      cursor: pointer;
+    }
+    .like-icon {
+      width: 100%;
+      height: 100%;
+      fill: rgba(255,255,255,0.5);
+      transition: fill 0.3s, transform 0.3s;
+    }
+    .like-icon.liked {
+      fill: rgba(255, 0, 0, 0.9);
+      transform: scale(1.2);
+    }
+
+    /* Kedvencek panel */
+    #favorites-panel {
+      margin-top: 20px;
+      display: none;
+      background: rgba(255,255,255,0.3);
+      padding: 20px;
+      border-radius: 12px;
+      animation: fadeIn 0.5s forwards;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+      text-align: left;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    #favorites-panel h2 {
+      margin-bottom: 10px;
+      font-size: 1.3rem;
+      text-align: center;
+    }
+    #favorites-list {
+      list-style: none;
+      padding: 0;
+    }
+    #favorites-list li {
+      margin-bottom: 8px;
+      background: rgba(255,255,255,0.2);
+      padding: 8px;
+      border-radius: 6px;
+    }
+
+    /* Easter egg: extra infó a borító kattintására */
+    .album-info {
+      display: none; /* Alapból rejtve */
+      margin-top: 15px;
+      background: rgba(255,255,255,0.3);
+      padding: 15px;
+      border-radius: 12px;
+      animation: fadeInEaster 0.5s ease forwards;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+      text-align: left;
+    }
+    @keyframes fadeInEaster {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    .album-info p {
+      margin: 0;
+    }
+
+    /* Reszponzív */
+    @media (max-width: 480px) {
+      #quote {
+        font-size: 1.2rem;
+      }
+      h1 {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Háttér csillagok/tündöklések -->
+  <div class="stars" id="stars-container"></div>
+
+  <!-- Felhők (opcionális) -->
+  <div class="cloud" style="top: 10%; left: 10%;"></div>
+  <div class="cloud" style="top: 40%; right: 10%;"></div>
+  <div class="cloud" style="bottom: 20%; left: 25%;"></div>
+
+  <div class="container">
+    <!-- Album borító -->
+    <img src="graduation.jpg" alt="Graduation Album Cover"
+         class="album-cover" id="album-cover" />
+
+    <h1>Kanye West Idézet</h1>
+    <blockquote id="quote">Betöltés...</blockquote>
+    <div class="signature">– Kanye West</div>
+
+    <div class="buttons">
+      <button id="random-quote-btn">Új véletlen idézet</button>
+      <button id="add-fav-btn">Kedvencekhez</button>
+      <button id="toggle-favs-btn">Kedvencek megtekintése</button>
+
+      <!-- Like gomb (szív ikon) -->
+      <button class="like-btn" id="like-btn" aria-label="like">
+        <svg class="like-icon" viewBox="0 0 24 24">
+          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 
+                   2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09 
+                   1.09-1.28 2.76-2.09 4.5-2.09 3.08 0 5.5 2.42 
+                   5.5 5.5 0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Kedvencek panel (rejtve) -->
+    <div id="favorites-panel">
+      <h2>Kedvenceid</h2>
+      <ul id="favorites-list"></ul>
+    </div>
+
+    <!-- Easter egg: extra infó (album-info) -->
+    <div class="album-info" id="album-info">
+      <p>
+        A <strong>Graduation</strong> Kanye West harmadik stúdióalbuma (2007),
+        melynek borítóját Takashi Murakami tervezte. Az album
+        <em>Grammy-díjat</em> nyert a legjobb rap album kategóriában.
+      </p>
+    </div>
+  </div>
+
+  <script>
+    // --- Napi idézet (localStorage alapú) ---
+    const quoteElement = document.getElementById("quote");
+    const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+    const storedQuote = localStorage.getItem("kanyeQuote");
+    const storedDate = localStorage.getItem("quoteDate");
+
+    async function fetchNewQuote() {
+      try {
+        const response = await fetch("https://api.kanye.rest/");
+        const data = await response.json();
+        return data.quote;
+      } catch (error) {
+        console.error("Hiba az idézet lekérésekor:", error);
+        return null;
+      }
+    }
+
+    async function loadDailyQuote() {
+      if (!storedQuote || storedDate !== today) {
+        const newQuote = await fetchNewQuote();
+        if (newQuote) {
+          localStorage.setItem("kanyeQuote", newQuote);
+          localStorage.setItem("quoteDate", today);
+          quoteElement.innerText = newQuote;
+        } else {
+          quoteElement.innerText =
+            "Nem sikerült új idézetet betölteni. Próbáld frissíteni az oldalt.";
+        }
+      } else {
+        quoteElement.innerText = storedQuote;
+      }
+    }
+
+    // --- Véletlen idézet fade-out/fade-in ---
+    document.getElementById("random-quote-btn").addEventListener("click", async () => {
+      const newQuote = await fetchNewQuote();
+      if (newQuote) {
+        // Fade-out
+        quoteElement.classList.add("fade-out");
+        setTimeout(() => {
+          quoteElement.innerText = newQuote;
+          quoteElement.classList.remove("fade-out");
+        }, 500);
+        // LocalStorage frissítés
+        localStorage.setItem("kanyeQuote", newQuote);
+        localStorage.setItem("quoteDate", today);
+      } else {
+        quoteElement.innerText = "Hiba történt. Próbáld újra!";
+      }
+    });
+
+    // --- Like gomb ---
+    const likeBtn = document.getElementById("like-btn");
+    const likeIcon = likeBtn.querySelector(".like-icon");
+
+    const storedLike = localStorage.getItem("kanyeLiked") === "true";
+    if (storedLike) {
+      likeIcon.classList.add("liked");
+    }
+
+    likeBtn.addEventListener("click", () => {
+      likeIcon.classList.toggle("liked");
+      localStorage.setItem("kanyeLiked", likeIcon.classList.contains("liked"));
+    });
+
+    // --- Kedvencek gyűjtése ---
+    let favoriteQuotes = JSON.parse(localStorage.getItem("favoriteQuotes")) || [];
+
+    document.getElementById("add-fav-btn").addEventListener("click", () => {
+      const currentQuote = quoteElement.innerText.trim();
+      if (currentQuote && !favoriteQuotes.includes(currentQuote)) {
+        favoriteQuotes.push(currentQuote);
+        localStorage.setItem("favoriteQuotes", JSON.stringify(favoriteQuotes));
+        alert("Hozzáadva a kedvencekhez!");
+      } else if (favoriteQuotes.includes(currentQuote)) {
+        alert("Ez az idézet már a kedvencek között szerepel!");
+      }
+    });
+
+    // --- Kedvencek megtekintése ---
+    const toggleFavsBtn = document.getElementById("toggle-favs-btn");
+    const favoritesPanel = document.getElementById("favorites-panel");
+    let favsVisible = false;
+
+    toggleFavsBtn.addEventListener("click", () => {
+      favsVisible = !favsVisible;
+      if (favsVisible) {
+        updateFavoritesList();
+        favoritesPanel.style.display = "block";
+      } else {
+        favoritesPanel.style.display = "none";
+      }
+    });
+
+    function updateFavoritesList() {
+      const favoritesList = document.getElementById("favorites-list");
+      favoritesList.innerHTML = "";
+      favoriteQuotes.forEach(quote => {
+        const li = document.createElement("li");
+        li.textContent = quote;
+        favoritesList.appendChild(li);
+      });
+    }
+
+    // --- Easter Egg: kattintás a borítóra ---
+    const albumCover = document.getElementById("album-cover");
+    const albumInfo = document.getElementById("album-info");
+    let infoVisible = false;
+
+    albumCover.addEventListener("click", () => {
+      infoVisible = !infoVisible;
+      albumInfo.style.display = infoVisible ? "block" : "none";
+    });
+
+    // --- Napi idézet betöltése ---
+    loadDailyQuote();
+
+    // --- Csillagok generálása ---
+    const starsContainer = document.getElementById("stars-container");
+    const numberOfStars = 60;
+    for (let i = 0; i < numberOfStars; i++) {
+      const star = document.createElement("div");
+      star.classList.add("star");
+      star.style.top = Math.random() * 100 + "%";
+      star.style.left = Math.random() * 100 + "%";
+      const duration = (Math.random() * 2 + 1).toFixed(2);
+      star.style.animationDuration = `${duration}s, 20s`;
+      starsContainer.appendChild(star);
+    }
+  </script>
+</body>
+</html>
